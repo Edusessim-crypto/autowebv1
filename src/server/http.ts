@@ -29,9 +29,10 @@ export function failure(error: unknown) {
       { error: error.issues[0]?.message || "Confira os campos." },
       { status: 400 },
     );
+  // The message stays in the server log only; the response below is generic.
   console.error(
     "[autoweb] Request failed:",
-    error instanceof Error ? error.name : "UnknownError",
+    error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError",
   );
   return NextResponse.json(
     { error: "Não foi possível concluir. Tente novamente." },
