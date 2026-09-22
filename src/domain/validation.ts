@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { leadSources, leadStages, activityTypes, normalizePhone } from "./crm";
 export const statuses = [
   "AVAILABLE",
   "RESERVED",
@@ -95,3 +96,49 @@ export const vehicleSchema = z
     "Confira o ano de fabricação e o ano do modelo.",
   );
 export type VehicleInput = z.infer<typeof vehicleSchema>;
+const phone = text(20).transform(normalizePhone);
+export const customerSchema = z
+  .object({
+    name: text(120).min(2, "Informe o nome do cliente."),
+    phone: phone.default(""),
+    whatsapp: phone.default(""),
+    email: z
+      .union([z.literal(""), z.email().max(254)])
+      .default("")
+      .transform((v) => v.toLowerCase()),
+    notes: text(4000).default(""),
+  })
+  // A customer nobody can reach is not usable commercially.
+  .refine(
+    (v) => Boolean(v.phone || v.whatsapp || v.email),
+    "Informe ao menos um contato: telefone, WhatsApp ou e-mail.",
+  );
+export type CustomerInput = z.infer<typeof customerSchema>;
+const optionalId = z
+  .union([z.literal(""), z.uuid()])
+  .default("")
+  .transform((v) => v || null);
+export const leadSchema = z.object({
+  customerId: z.uuid("Selecione um cliente."),
+  vehicleId: optionalId,
+  assignedToUserId: optionalId,
+  source: z.enum(leadSources).default("OTHER"),
+  stage: z.enum(leadStages).default("NEW"),
+  notes: text(4000).default(""),
+  nextActionAt: z.coerce.date().nullable().default(null),
+});
+export type LeadInput = z.infer<typeof leadSchema>;
+export const stageChangeSchema = z
+  .object({
+    stage: z.enum(leadStages),
+    lostReason: text(300).default(""),
+  })
+  // Knowing why deals are lost is the point of tracking the stage.
+  .refine(
+    (v) => v.stage !== "LOST" || v.lostReason.length > 0,
+    "Informe o motivo da perda.",
+  );
+export const activitySchema = z.object({
+  type: z.enum(activityTypes).default("NOTE"),
+  content: text(2000).min(1, "Escreva o conteúdo da atividade."),
+});

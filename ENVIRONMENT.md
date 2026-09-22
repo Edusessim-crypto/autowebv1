@@ -20,6 +20,8 @@ Arquivos `.env*` reais são ignorados; `.env.example` contém apenas configuraç
 
 A aplicação inicializa o schema local ao abrir o banco. PGlite permite um único processo por diretório: pare o servidor antes de executar seed/migrações que usem o mesmo diretório. Testes usam um diretório temporário próprio. Datas comerciais seguem America/Sao_Paulo.
 
+`npm run dev` usa `.data` conforme `.env.local`, sem variável adicional. O diretório é descartável: `npm run db:seed` recria a demo inteira, com as fotos versionadas em `assets/demo`. Um cluster PGlite que pare de abrir (`Aborted()` ao consultar) não é recuperável por aqui — apague `.data` e rode o seed novamente.
+
 ## Build e Linux
 
 `npm run build` produz Next.js standalone. O Dockerfile prepara Node em Linux e usuário sem privilégios. PostgreSQL externo deve estar acessível; execute as migrações em um job separado antes da aplicação. Produção não inicializa schema automaticamente.

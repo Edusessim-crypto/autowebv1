@@ -11,6 +11,7 @@ import {
 import type { Role } from "@/domain/policies";
 import type { Plan } from "@/domain/plans";
 import type { statuses } from "@/domain/validation";
+import type { LeadSource, LeadStage, ActivityType } from "@/domain/crm";
 const dates = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -146,6 +147,82 @@ export const loginAttempts = pgTable("login_attempts", {
   count: integer().notNull(),
   resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
 });
+export const customers = pgTable(
+  "customers",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    createdById: text("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    name: text().notNull(),
+    phone: text().notNull().default(""),
+    whatsapp: text().notNull().default(""),
+    email: text().notNull().default(""),
+    notes: text().notNull().default(""),
+    ...dates,
+  },
+  (t) => [
+    index("customer_tenant_idx").on(t.dealershipId, t.createdAt),
+    index("customer_phone_idx").on(t.dealershipId, t.phone),
+  ],
+);
+export const leads = pgTable(
+  "leads",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    customerId: text("customer_id")
+      .notNull()
+      .references(() => customers.id),
+    vehicleId: text("vehicle_id").references(() => vehicles.id),
+    assignedToUserId: text("assigned_to_user_id").references(() => users.id),
+    createdById: text("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    source: text().$type<LeadSource>().notNull().default("OTHER"),
+    stage: text().$type<LeadStage>().notNull().default("NEW"),
+    notes: text().notNull().default(""),
+    lastContactAt: timestamp("last_contact_at", { withTimezone: true }),
+    nextActionAt: timestamp("next_action_at", { withTimezone: true }),
+    lostReason: text("lost_reason").notNull().default(""),
+    ...dates,
+  },
+  (t) => [
+    index("lead_stage_idx").on(t.dealershipId, t.stage, t.updatedAt),
+    index("lead_assigned_idx").on(t.dealershipId, t.assignedToUserId, t.stage),
+    index("lead_vehicle_idx").on(t.dealershipId, t.vehicleId),
+    index("lead_customer_idx").on(t.dealershipId, t.customerId),
+  ],
+);
+export const crmActivities = pgTable(
+  "crm_activities",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    leadId: text("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    type: text().$type<ActivityType>().notNull().default("NOTE"),
+    content: text().notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("activity_lead_idx").on(t.leadId, t.createdAt)],
+);
 export type Vehicle = typeof vehicles.$inferSelect;
+export type Customer = typeof customers.$inferSelect;
+export type Lead = typeof leads.$inferSelect;
+export type CrmActivity = typeof crmActivities.$inferSelect;
 export type Dealership = typeof dealerships.$inferSelect;
 export type Media = typeof vehicleMedia.$inferSelect;
