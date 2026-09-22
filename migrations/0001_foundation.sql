@@ -1,10 +1,111 @@
-CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, name text NOT NULL, email text NOT NULL UNIQUE, password_hash text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
-CREATE TABLE IF NOT EXISTS dealerships (id text PRIMARY KEY, trade_name text NOT NULL, legal_name text, cnpj text NOT NULL UNIQUE, slug text NOT NULL UNIQUE, phone text NOT NULL, city text NOT NULL, state text NOT NULL, logo_url text, primary_color text NOT NULL DEFAULT '#FF1E1E', plan text NOT NULL DEFAULT 'START' CHECK(plan IN ('START','PRO','PERFORMANCE')), billing_cycle text NOT NULL DEFAULT 'MONTHLY', subscription_status text NOT NULL DEFAULT 'TRIAL', trial_ends_at timestamptz NOT NULL, is_demo boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
-CREATE TABLE IF NOT EXISTS memberships (id text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id), dealership_id text NOT NULL REFERENCES dealerships(id), role text NOT NULL CHECK(role IN ('ADMIN','MANAGER','SALESPERSON')), status text NOT NULL DEFAULT 'ACTIVE', CONSTRAINT membership_unique UNIQUE(user_id,dealership_id));
-CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id text NOT NULL REFERENCES users(id), dealership_id text REFERENCES dealerships(id), expires_at timestamptz NOT NULL);
-CREATE TABLE IF NOT EXISTS vehicles (id text PRIMARY KEY, dealership_id text NOT NULL REFERENCES dealerships(id), created_by_id text NOT NULL REFERENCES users(id), brand text NOT NULL, model text NOT NULL, version text NOT NULL DEFAULT '', year_manufacture integer NOT NULL, year_model integer NOT NULL, mileage integer NOT NULL CHECK(mileage >= 0), transmission text NOT NULL, fuel text NOT NULL, color text NOT NULL, price integer NOT NULL CHECK(price > 0), plate text NOT NULL DEFAULT '', description text NOT NULL DEFAULT '', options jsonb NOT NULL DEFAULT '[]', status text NOT NULL DEFAULT 'AVAILABLE' CHECK(status IN ('AVAILABLE','RESERVED','PREPARING','SOLD','UNAVAILABLE')), sold_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE(id,dealership_id));
-CREATE INDEX IF NOT EXISTS vehicle_tenant_idx ON vehicles(dealership_id,created_at);
-CREATE TABLE IF NOT EXISTS vehicle_media (id text PRIMARY KEY, dealership_id text NOT NULL REFERENCES dealerships(id), vehicle_id text NOT NULL, storage_key text NOT NULL, thumbnail_key text NOT NULL, position integer NOT NULL, is_cover boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now(), FOREIGN KEY(vehicle_id,dealership_id) REFERENCES vehicles(id,dealership_id) ON DELETE CASCADE);
-CREATE TABLE IF NOT EXISTS usage (id text PRIMARY KEY, dealership_id text NOT NULL REFERENCES dealerships(id), period text NOT NULL, vehicle_count integer NOT NULL DEFAULT 0, CONSTRAINT usage_unique UNIQUE(dealership_id,period));
-CREATE TABLE IF NOT EXISTS audit_logs (id text PRIMARY KEY, dealership_id text NOT NULL REFERENCES dealerships(id), user_id text NOT NULL REFERENCES users(id), entity_id text NOT NULL, event text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
-CREATE TABLE IF NOT EXISTS login_attempts (key text PRIMARY KEY, count integer NOT NULL, reset_at timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS users (
+  id text PRIMARY KEY,
+  name text NOT NULL,
+  email text NOT NULL UNIQUE,
+  password_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS dealerships (
+  id text PRIMARY KEY,
+  trade_name text NOT NULL,
+  legal_name text,
+  cnpj text NOT NULL UNIQUE,
+  slug text NOT NULL UNIQUE,
+  phone text NOT NULL,
+  city text NOT NULL,
+  state text NOT NULL,
+  logo_url text,
+  primary_color text NOT NULL DEFAULT '#FF1E1E',
+  plan text NOT NULL DEFAULT 'START'
+    CHECK (plan IN ('START','PRO','PERFORMANCE')),
+  billing_cycle text NOT NULL DEFAULT 'MONTHLY',
+  subscription_status text NOT NULL DEFAULT 'TRIAL',
+  trial_ends_at timestamptz NOT NULL,
+  is_demo boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS memberships (
+  id text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id),
+  dealership_id text NOT NULL REFERENCES dealerships(id),
+  role text NOT NULL
+    CHECK (role IN ('ADMIN','MANAGER','SALESPERSON')),
+  status text NOT NULL DEFAULT 'ACTIVE',
+  CONSTRAINT membership_unique UNIQUE (user_id, dealership_id)
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash text PRIMARY KEY,
+  user_id text NOT NULL REFERENCES users(id),
+  dealership_id text REFERENCES dealerships(id),
+  expires_at timestamptz NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS vehicles (
+  id text PRIMARY KEY,
+  dealership_id text NOT NULL REFERENCES dealerships(id),
+  created_by_id text NOT NULL REFERENCES users(id),
+  brand text NOT NULL,
+  model text NOT NULL,
+  version text NOT NULL DEFAULT '',
+  year_manufacture integer NOT NULL,
+  year_model integer NOT NULL,
+  mileage integer NOT NULL CHECK (mileage >= 0),
+  transmission text NOT NULL,
+  fuel text NOT NULL,
+  color text NOT NULL,
+  price integer NOT NULL CHECK (price > 0),
+  plate text NOT NULL DEFAULT '',
+  description text NOT NULL DEFAULT '',
+  options jsonb NOT NULL DEFAULT '[]',
+  status text NOT NULL DEFAULT 'AVAILABLE'
+    CHECK (status IN ('AVAILABLE','RESERVED','PREPARING','SOLD','UNAVAILABLE')),
+  sold_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (id, dealership_id)
+);
+
+CREATE INDEX IF NOT EXISTS vehicle_tenant_idx
+  ON vehicles (dealership_id, created_at);
+
+CREATE TABLE IF NOT EXISTS vehicle_media (
+  id text PRIMARY KEY,
+  dealership_id text NOT NULL REFERENCES dealerships(id),
+  vehicle_id text NOT NULL,
+  storage_key text NOT NULL,
+  thumbnail_key text NOT NULL,
+  position integer NOT NULL,
+  is_cover boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  FOREIGN KEY (vehicle_id, dealership_id)
+    REFERENCES vehicles(id, dealership_id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS usage (
+  id text PRIMARY KEY,
+  dealership_id text NOT NULL REFERENCES dealerships(id),
+  period text NOT NULL,
+  vehicle_count integer NOT NULL DEFAULT 0,
+  CONSTRAINT usage_unique UNIQUE (dealership_id, period)
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id text PRIMARY KEY,
+  dealership_id text NOT NULL REFERENCES dealerships(id),
+  user_id text NOT NULL REFERENCES users(id),
+  entity_id text NOT NULL,
+  event text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+  key text PRIMARY KEY,
+  count integer NOT NULL,
+  reset_at timestamptz NOT NULL
+);

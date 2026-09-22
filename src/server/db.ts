@@ -11,7 +11,7 @@ export async function getDb(): Promise<Database> {
   globalDb.autowebDb ??= (async () => {
     if (process.env.DATABASE_URL)
       return drizzle(
-        new Pool({ connectionString: process.env.DATABASE_URL, max: 10 }),
+        new Pool({ connectionString: process.env.DATABASE_URL, max: 1 }),
         { schema },
       );
     if (
