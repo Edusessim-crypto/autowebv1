@@ -2932,8 +2932,9 @@ progress::-moz-progress-bar {
 }
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  align-items: start;
 }
 .detail-grid .span-2 {
   grid-column: span 2;
@@ -2941,10 +2942,20 @@ progress::-moz-progress-bar {
 .detail-grid .span-3 {
   grid-column: span 3;
 }
+.detail-grid .panel > .data-table {
+  border-radius: 0;
+}
+/* The tall default empty state leaves dead space in these smaller panels. */
+.detail-grid .empty-state,
+.vehicle-leads .empty-state {
+  min-height: 160px;
+  padding: 28px 22px;
+}
 .contact-list {
   list-style: none;
   display: grid;
-  gap: 12px;
+  gap: 13px;
+  padding: 20px 22px;
 }
 .contact-list li {
   display: flex;
@@ -2954,7 +2965,7 @@ progress::-moz-progress-bar {
   font-size: 0.9rem;
 }
 .detail-notes {
-  margin-top: 16px;
+  margin: 0 22px 20px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
   color: var(--muted);
@@ -2965,13 +2976,14 @@ progress::-moz-progress-bar {
   list-style: none;
   display: grid;
   gap: 8px;
+  padding: 16px 22px 20px;
 }
 .lead-line {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
-  padding: 11px 13px;
+  padding: 13px 15px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);
@@ -3004,18 +3016,6 @@ progress::-moz-progress-bar {
   gap: 10px;
   flex-wrap: wrap;
 }
-.panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.panel-heading h2 {
-  font-size: 1rem;
-  font-weight: 600;
-}
 
 /* Kanban */
 .stage-selector {
@@ -3047,21 +3047,20 @@ progress::-moz-progress-bar {
   color: var(--subtle);
   font-size: 0.75rem;
 }
+/* Seven stages share the width instead of scrolling sideways. */
 .kanban {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(250px, 1fr);
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  align-items: start;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
 .kanban-column {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px;
-  min-height: 140px;
+  padding: 12px 10px;
+  min-height: 180px;
+  min-width: 0;
 }
 .kanban-column > header {
   display: flex;
@@ -3070,11 +3069,14 @@ progress::-moz-progress-bar {
   margin-bottom: 12px;
 }
 .kanban-column h2 {
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .kanban-column .count {
   color: var(--subtle);
@@ -3102,24 +3104,31 @@ progress::-moz-progress-bar {
   padding: 0;
   cursor: pointer;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
+  line-height: 1.35;
+  word-break: break-word;
 }
 .lead-card-vehicle {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
+  min-width: 0;
+}
+.lead-card-vehicle span,
+.lead-card-meta span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .lead-card-vehicle:hover {
   color: var(--text);
 }
 .lead-card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 .lead-card-meta span {
   display: inline-flex;
@@ -3273,39 +3282,46 @@ progress::-moz-progress-bar {
   font-size: 0.74rem;
 }
 
-/* Formulários compartilhados */
+/* Formulários de clientes e CRM: reaproveitam o label global (flex/column). */
 .form-panel {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   max-width: 680px;
+  padding: 26px;
 }
-.field {
-  display: grid;
-  gap: 7px;
-}
-.field > span {
+.form-panel .field > span {
+  font-size: 0.75rem;
   color: var(--muted);
-  font-size: 0.8rem;
   font-weight: 500;
 }
-.field-row {
+.form-panel .field-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
-.field-hint {
-  color: var(--subtle);
-  font-size: 0.8rem;
+.form-panel .field-hint {
+  margin: 0;
 }
 .form-error {
   color: #ff8b8b;
   font-size: 0.86rem;
 }
-.form-actions {
-  display: flex;
-  gap: 10px;
+/* This panel has no side rail, so the actions sit inside its padding. */
+.form-panel .form-actions {
+  border-top: 1px solid var(--border);
+  padding: 20px 0 0;
   justify-content: flex-end;
-  flex-wrap: wrap;
+}
+
+/* Below this the seven columns get too narrow to read, so they scroll. */
+@media (max-width: 1400px) and (min-width: 721px) {
+  .kanban {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(210px, 1fr);
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -3338,7 +3354,7 @@ progress::-moz-progress-bar {
   .kanban-column > header {
     display: none;
   }
-  .field-row {
+  .form-panel .field-row {
     grid-template-columns: 1fr;
   }
   .data-table thead {

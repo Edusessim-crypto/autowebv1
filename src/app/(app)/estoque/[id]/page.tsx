@@ -229,7 +229,7 @@ export default async function VehicleDetail({
           ))}
         </section>
       ) : tab === "leads" ? (
-        <section className="panel">
+        <section className="panel vehicle-leads">
           <div className="panel-heading">
             <h2>Oportunidades deste veículo</h2>
             <Link

@@ -83,12 +83,15 @@ export default async function CustomerDetail({
         >
           {history.open.length ? (
             <ul className="lead-list">
-              {history.open.map(({ lead, assignedName }) => (
+              {history.open.map(({ lead, assignedName, vehicleLabel }) => (
                 <li key={lead.id}>
                   <Link href={`/crm?lead=${lead.id}`} className="lead-line">
                     <span className="stage-tag">
                       {leadStageLabels[lead.stage]}
                     </span>
+                    {vehicleLabel && (
+                      <span className="lead-source">{vehicleLabel}</span>
+                    )}
                     <span className="lead-source">
                       {leadSourceLabels[lead.source]}
                     </span>

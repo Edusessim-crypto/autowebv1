@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, desc, ilike, or, sql, inArray } from "drizzle-orm";
 import { getDb } from "@/server/db";
-import { customers, leads, auditLogs, users } from "@/server/schema";
+import { customers, leads, auditLogs, users, vehicles } from "@/server/schema";
 import type { TenantContext } from "@/server/auth";
 import { assertPermission, AppError } from "@/domain/policies";
 import { canWrite } from "@/domain/plans";
@@ -149,9 +149,12 @@ export async function customerHistory(ctx: TenantContext, customerId: string) {
     .select({
       lead: leads,
       assignedName: users.name,
+      vehicleBrand: vehicles.brand,
+      vehicleModel: vehicles.model,
     })
     .from(leads)
     .leftJoin(users, eq(users.id, leads.assignedToUserId))
+    .leftJoin(vehicles, eq(vehicles.id, leads.vehicleId))
     .where(
       and(
         eq(leads.dealershipId, ctx.dealership.id),
@@ -159,9 +162,16 @@ export async function customerHistory(ctx: TenantContext, customerId: string) {
       ),
     )
     .orderBy(desc(leads.updatedAt));
+  const withVehicle = rows.map((r) => ({
+    ...r,
+    vehicleLabel:
+      r.vehicleBrand && r.vehicleModel
+        ? `${r.vehicleBrand} ${r.vehicleModel}`
+        : null,
+  }));
   return {
-    open: rows.filter((r) => !isClosed(r.lead.stage)),
-    closed: rows.filter((r) => isClosed(r.lead.stage)),
+    open: withVehicle.filter((r) => !isClosed(r.lead.stage)),
+    closed: withVehicle.filter((r) => isClosed(r.lead.stage)),
   };
 }
 
