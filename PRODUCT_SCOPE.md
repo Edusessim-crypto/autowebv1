@@ -21,9 +21,11 @@ Princípio: **Cadastre uma vez. A AutoWeb faz o resto.** O veículo é o centro 
 
 Criar ContentTemplate e ContentProject com autorização por tenant. Fluxo veículo → fotos → template → preview → composição estática → revisão → exportação. Legenda deve usar somente dados cadastrados. Sem vídeos/Reels. Personalização obedece entitlements. Gerar assets via serviço independente, com estados reais de processamento/erro.
 
-## Fase CRM
+## Fase CRM — entregue
 
-Customer, Lead, atividades e timeline. Etapas NOVO, CONTATADO, QUALIFICADO, VISITA, PROPOSTA, VENDA e PERDIDO. Vínculos com veículo e vendedor validados na mesma revenda. Mudança de etapa pelo detalhe antes de drag-and-drop. WhatsApp via link real.
+Customer, Lead, atividades e timeline. Etapas NOVO, CONTATADO, QUALIFICADO, VISITA, PROPOSTA, VENDA e PERDIDO. Vínculos com veículo e vendedor validados na mesma revenda. Mudança de etapa pelo detalhe; drag-and-drop segue pendente. WhatsApp via link real, sem caixa de entrada.
+
+Pendente desta fase: arraste no funil, próxima ação com data pela interface e deduplicação de clientes na criação.
 
 ## Fase publicações
 

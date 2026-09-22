@@ -7,10 +7,10 @@ Next.js App Router, React, TypeScript estrito, Tailwind CSS 4 + tokens CSS, Driz
 - `src/app`: rotas, composição das páginas e handlers HTTP.
 - `src/components`: componentes de apresentação e interações de formulário.
 - `src/domain`: validação, permissões e regras de planos.
-- `src/services`: casos de uso de estoque e mídia.
+- `src/services`: casos de uso de estoque, mídia, clientes e CRM.
 - `src/server`: acesso ao banco, schema, autenticação e storage.
 - `src/config`: navegação.
-- `migrations`: SQL versionado.
+- `migrations`: SQL versionado, aplicado em ordem de nome. Cada arquivo é idempotente, então repetir o conjunto leva qualquer banco ao schema atual.
 
 ## Autenticação
 
@@ -41,3 +41,11 @@ O modo local usa PGlite, motor PostgreSQL embarcado. Produção usa `pg` e Postg
 ## Próximos módulos
 
 Branch, Customer, Lead, ContentTemplate, ContentProject, SocialPost e SiteConfig serão introduzidos nas suas fases, sempre com vínculo explícito à revenda. Não existem tabelas e integrações vazias fingindo funcionalidade. Os provedores de cobrança e jobs estão delimitados como contratos; não executam cobranças ou publicações.
+
+## CRM
+
+`customers`, `leads` e `crm_activities` seguem o isolamento por revenda das demais tabelas. Uma oportunidade pode apontar para um veículo e para um responsável, ambos opcionais, e os três vínculos são verificados contra a revenda antes de gravar.
+
+A visibilidade do vendedor é aplicada em SQL, não na interface: `ADMIN` e `MANAGER` leem o funil inteiro, `SALESPERSON` apenas as oportunidades atribuídas a si, e só pode atribuir uma oportunidade a si mesmo. Telefones são normalizados para dígitos na gravação, de modo que busca e deduplicação concordem.
+
+A mudança de etapa grava atividade e log de auditoria na mesma transação do lead. Marcar como perdido exige motivo.

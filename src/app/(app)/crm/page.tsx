@@ -13,10 +13,7 @@ export default async function Crm({
 }) {
   const p = await searchParams;
   const ctx = await requireTenant();
-  const [columns, team] = await Promise.all([
-    board(ctx),
-    salespeople(ctx),
-  ]);
+  const [columns, team] = await Promise.all([board(ctx), salespeople(ctx)]);
   const total = columns.reduce((sum, column) => sum + column.total, 0);
 
   return (

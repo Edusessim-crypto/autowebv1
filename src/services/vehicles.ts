@@ -175,33 +175,29 @@ export async function saveVehicle(
           402,
         );
       id = randomUUID();
-      await tx
-        .insert(vehicles)
-        .values({
-          ...data,
-          id,
-          dealershipId: dealership.id,
-          createdById: ctx.user.id,
-          soldAt: data.status === "SOLD" ? new Date() : null,
-        });
+      await tx.insert(vehicles).values({
+        ...data,
+        id,
+        dealershipId: dealership.id,
+        createdById: ctx.user.id,
+        soldAt: data.status === "SOLD" ? new Date() : null,
+      });
       await tx
         .update(usage)
         .set({ vehicleCount: current.vehicleCount + 1 })
         .where(eq(usage.id, current.id));
     }
-    await tx
-      .insert(auditLogs)
-      .values({
-        id: randomUUID(),
-        dealershipId: dealership.id,
-        userId: ctx.user.id,
-        entityId: id,
-        event: creating
-          ? "vehicle.created"
-          : data.status === "SOLD"
-            ? "vehicle.sold"
-            : "vehicle.updated",
-      });
+    await tx.insert(auditLogs).values({
+      id: randomUUID(),
+      dealershipId: dealership.id,
+      userId: ctx.user.id,
+      entityId: id,
+      event: creating
+        ? "vehicle.created"
+        : data.status === "SOLD"
+          ? "vehicle.sold"
+          : "vehicle.updated",
+    });
     return id;
   });
 }

@@ -33,14 +33,12 @@ export async function createSession(
 ) {
   const db = await getDb();
   const token = randomBytes(32).toString("hex");
-  await db
-    .insert(sessions)
-    .values({
-      tokenHash: tokenHash(token),
-      userId,
-      dealershipId,
-      expiresAt: new Date(Date.now() + 7 * 86400000),
-    });
+  await db.insert(sessions).values({
+    tokenHash: tokenHash(token),
+    userId,
+    dealershipId,
+    expiresAt: new Date(Date.now() + 7 * 86400000),
+  });
   (await cookies()).set(cookieName, token, {
     httpOnly: true,
     secure:

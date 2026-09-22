@@ -181,7 +181,13 @@ export default async function VehicleDetail({
               { icon: CarFront, label: "Estoque", value: "Cadastrado" },
               { icon: Layers3, label: "Conteúdo", value: "Em breve" },
               { icon: Globe2, label: "Site", value: "Configuração necessária" },
-              { icon: UsersRound, label: "Leads", value: "CRM em breve" },
+              {
+                icon: UsersRound,
+                label: "Leads",
+                value: relatedLeads.length
+                  ? `${relatedLeads.length} interessado(s)`
+                  : "Nenhum interessado",
+              },
             ].map((c) => (
               <div key={c.label}>
                 <c.icon size={17} />
@@ -226,7 +232,10 @@ export default async function VehicleDetail({
         <section className="panel">
           <div className="panel-heading">
             <h2>Oportunidades deste veículo</h2>
-            <Link className="button secondary" href={`/crm/novo?vehicleId=${v.id}`}>
+            <Link
+              className="button secondary"
+              href={`/crm/novo?vehicleId=${v.id}`}
+            >
               <Plus size={16} />
               Adicionar lead
             </Link>
@@ -260,9 +269,7 @@ export default async function VehicleDetail({
                     <td data-label="Origem">
                       {leadSourceLabels[item.lead.source]}
                     </td>
-                    <td data-label="Responsável">
-                      {item.assignedName || "—"}
-                    </td>
+                    <td data-label="Responsável">{item.assignedName || "—"}</td>
                   </tr>
                 ))}
               </tbody>

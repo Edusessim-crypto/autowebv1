@@ -75,17 +75,15 @@ export async function uploadMedia(
           ),
         );
       if (count.n >= 30) throw new AppError("Limite de 30 fotos por veículo.");
-      await tx
-        .insert(vehicleMedia)
-        .values({
-          id,
-          dealershipId: ctx.dealership.id,
-          vehicleId,
-          storageKey,
-          thumbnailKey,
-          position: count.n,
-          isCover: count.n === 0,
-        });
+      await tx.insert(vehicleMedia).values({
+        id,
+        dealershipId: ctx.dealership.id,
+        vehicleId,
+        storageKey,
+        thumbnailKey,
+        position: count.n,
+        isCover: count.n === 0,
+      });
     });
   } catch (e) {
     await storage.remove(storageKey);

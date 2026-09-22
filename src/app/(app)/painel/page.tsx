@@ -162,7 +162,10 @@ export default async function Dashboard() {
             <ul className="lead-list">
               {crm.recent.map((item) => (
                 <li key={item.lead.id}>
-                  <Link className="lead-line" href={`/crm?lead=${item.lead.id}`}>
+                  <Link
+                    className="lead-line"
+                    href={`/crm?lead=${item.lead.id}`}
+                  >
                     <span className="stage-tag">
                       {leadStageLabels[item.lead.stage]}
                     </span>

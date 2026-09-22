@@ -4,9 +4,7 @@ import { requireTenant } from "@/server/auth";
 import { assertOrigin, jsonBody, failure } from "@/server/http";
 import { assignLead } from "@/services/leads";
 const schema = z.object({
-  userId: z
-    .union([z.literal(""), z.uuid()])
-    .transform((v) => v || null),
+  userId: z.union([z.literal(""), z.uuid()]).transform((v) => v || null),
 });
 export async function POST(
   request: Request,

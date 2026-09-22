@@ -45,22 +45,18 @@ export async function POST(request: Request) {
           .slice(0, 60) +
         "-" +
         id.slice(0, 6);
-      await tx
-        .insert(dealerships)
-        .values({
-          ...data,
-          id,
-          slug,
-          trialEndsAt: new Date(Date.now() + 7 * 86400000),
-        });
-      await tx
-        .insert(memberships)
-        .values({
-          id: randomUUID(),
-          userId: ctx.user.id,
-          dealershipId: id,
-          role: "ADMIN",
-        });
+      await tx.insert(dealerships).values({
+        ...data,
+        id,
+        slug,
+        trialEndsAt: new Date(Date.now() + 7 * 86400000),
+      });
+      await tx.insert(memberships).values({
+        id: randomUUID(),
+        userId: ctx.user.id,
+        dealershipId: id,
+        role: "ADMIN",
+      });
       await tx
         .update(sessions)
         .set({ dealershipId: id })

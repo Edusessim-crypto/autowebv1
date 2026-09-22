@@ -245,7 +245,10 @@ test("CRM: etapas, motivo da perda e histórico", async () => {
   assert.equal(lost.lead.stage, "LOST");
   assert.equal(lost.lead.lostReason, "Comprou em outra loja");
 
-  await addActivity(ctx, leadId, { type: "CALL", content: "Retornei a ligação" });
+  await addActivity(ctx, leadId, {
+    type: "CALL",
+    content: "Retornei a ligação",
+  });
   const detail = await getLead(ctx, leadId);
   // Creation, two stage changes and the call.
   assert.equal(detail.activities.length, 4);
@@ -323,7 +326,9 @@ test("CRM: regras de domínio para contato e visibilidade", () => {
   assert.throws(() =>
     customerSchema.parse({ name: "Sem contato", phone: "", whatsapp: "" }),
   );
-  assert.ok(customerSchema.parse({ name: "Com telefone", phone: "11988887777" }));
+  assert.ok(
+    customerSchema.parse({ name: "Com telefone", phone: "11988887777" }),
+  );
 
   assert.equal(canReadLead("ADMIN", "u1", { assignedToUserId: "u2" }), true);
   assert.equal(canReadLead("MANAGER", "u1", { assignedToUserId: "u2" }), true);

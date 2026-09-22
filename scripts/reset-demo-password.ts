@@ -9,10 +9,7 @@ async function main() {
   const email = "demo@autoweb.example";
   const password = "AutoWebDemo2026!";
 
-  const existing = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email));
+  const existing = await db.select().from(users).where(eq(users.email, email));
 
   if (!existing.length) {
     console.log("❌ Usuário demo NÃO existe no banco.");

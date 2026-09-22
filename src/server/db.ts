@@ -36,8 +36,7 @@ export async function getDb(): Promise<Database> {
     );
     await mkdir(directory, { recursive: true });
     const client = new PGlite(path.join(directory, "postgres"));
-    for (const statements of await migrations())
-      await client.exec(statements);
+    for (const statements of await migrations()) await client.exec(statements);
     // Both adapters execute the same PostgreSQL schema and Drizzle query API.
     return drizzleLite(client, { schema }) as unknown as Database;
   })();

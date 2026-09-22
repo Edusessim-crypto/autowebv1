@@ -74,9 +74,7 @@ export default async function CustomerDetail({
               {customer.email || "Não informado"}
             </li>
           </ul>
-          {customer.notes && (
-            <p className="detail-notes">{customer.notes}</p>
-          )}
+          {customer.notes && <p className="detail-notes">{customer.notes}</p>}
         </Panel>
 
         <Panel
@@ -143,9 +141,7 @@ export default async function CustomerDetail({
                         <span className="cell-sub">{lead.lostReason}</span>
                       )}
                     </td>
-                    <td data-label="Origem">
-                      {leadSourceLabels[lead.source]}
-                    </td>
+                    <td data-label="Origem">{leadSourceLabels[lead.source]}</td>
                     <td data-label="Responsável">{assignedName || "—"}</td>
                     <td data-label="Atualizado">{date(lead.updatedAt)}</td>
                   </tr>

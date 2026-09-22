@@ -2,17 +2,17 @@
 
 ## Variáveis
 
-| Variável         | Uso                                                                                      |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| DATABASE_URL     | PostgreSQL externo. Obrigatório em produção.                                             |
-| APP_ORIGIN       | Origem exata autorizada, sem barra final. Local: http://127.0.0.1:3107. Produção: HTTPS. |
-| LOCAL_DATA_DIR   | Diretório local de banco e uploads; padrão `.data`.                                      |
-| STORAGE_PROVIDER | `supabase` ativa o Supabase Storage; qualquer outro valor mantém o disco local.           |
-| SUPABASE_URL     | URL do projeto Supabase, ex. `https://<ref>.supabase.co`. Exigida com `supabase`.        |
-| SUPABASE_SERVICE_ROLE_KEY | Chave `service_role`. Somente servidor: nunca expor ao cliente nem versionar.   |
-| SUPABASE_STORAGE_BUCKET | Bucket privado dos uploads; padrão `vehicle-media`.                                |
-| DEMO_PASSWORD    | Somente seed explícito local, mínimo 12 caracteres.                                      |
-| ALLOW_LOCAL_DB   | Escape `true` para verificar build de produção localmente. Nunca usar no deploy real.    |
+| Variável                  | Uso                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| DATABASE_URL              | PostgreSQL externo. Obrigatório em produção.                                             |
+| APP_ORIGIN                | Origem exata autorizada, sem barra final. Local: http://127.0.0.1:3107. Produção: HTTPS. |
+| LOCAL_DATA_DIR            | Diretório local de banco e uploads; padrão `.data`.                                      |
+| STORAGE_PROVIDER          | `supabase` ativa o Supabase Storage; qualquer outro valor mantém o disco local.          |
+| SUPABASE_URL              | URL do projeto Supabase, ex. `https://<ref>.supabase.co`. Exigida com `supabase`.        |
+| SUPABASE_SERVICE_ROLE_KEY | Chave `service_role`. Somente servidor: nunca expor ao cliente nem versionar.            |
+| SUPABASE_STORAGE_BUCKET   | Bucket privado dos uploads; padrão `vehicle-media`.                                      |
+| DEMO_PASSWORD             | Somente seed explícito local, mínimo 12 caracteres.                                      |
+| ALLOW_LOCAL_DB            | Escape `true` para verificar build de produção localmente. Nunca usar no deploy real.    |
 
 Arquivos `.env*` reais são ignorados; `.env.example` contém apenas configuração de exemplo. Scripts administrativos devem receber variáveis pelo processo ou `node --env-file`.
 

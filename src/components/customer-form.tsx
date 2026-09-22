@@ -44,7 +44,8 @@ export function CustomerForm({
         },
       );
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Não foi possível salvar.");
+      if (!response.ok)
+        throw new Error(data.error || "Não foi possível salvar.");
       router.push(`/clientes/${id || data.id}`);
       router.refresh();
     } catch (e) {
@@ -113,7 +114,11 @@ export function CustomerForm({
           Cancelar
         </Link>
         <Button type="submit" disabled={pending}>
-          {pending ? "Salvando…" : id ? "Salvar alterações" : "Cadastrar cliente"}
+          {pending
+            ? "Salvando…"
+            : id
+              ? "Salvar alterações"
+              : "Cadastrar cliente"}
         </Button>
       </div>
     </form>

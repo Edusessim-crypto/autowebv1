@@ -100,7 +100,8 @@ export function LeadDetail({
         body: JSON.stringify(body),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Não foi possível salvar.");
+      if (!response.ok)
+        throw new Error(data.error || "Não foi possível salvar.");
       await load();
       onChanged();
     } catch (e) {

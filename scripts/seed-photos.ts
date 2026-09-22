@@ -27,7 +27,8 @@ async function main() {
     .select()
     .from(users)
     .where(eq(users.email, "demo@autoweb.example"));
-  if (!user) throw new Error("Demo não encontrada. Rode npm run db:seed antes.");
+  if (!user)
+    throw new Error("Demo não encontrada. Rode npm run db:seed antes.");
   const [membership] = await db
     .select()
     .from(memberships)

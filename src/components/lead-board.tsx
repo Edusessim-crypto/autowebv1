@@ -36,9 +36,7 @@ type Column = {
 // "3 dias sem contato" reads faster than a date when scanning a board.
 function sinceLabel(value: string | null) {
   if (!value) return "Sem contato";
-  const days = Math.floor(
-    (Date.now() - new Date(value).getTime()) / 86400000,
-  );
+  const days = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
   if (days <= 0) return "Hoje";
   if (days === 1) return "Ontem";
   return `${days} dias sem contato`;

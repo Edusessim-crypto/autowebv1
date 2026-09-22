@@ -87,9 +87,8 @@ export function canAssign(role: Role, userId: string, targetUserId: string) {
 // the 55 country code. Stored digits-only so search and dedupe agree.
 export function normalizePhone(value: string) {
   const digits = value.replace(/\D/g, "");
-  const local = digits.startsWith("55") && digits.length > 11
-    ? digits.slice(2)
-    : digits;
+  const local =
+    digits.startsWith("55") && digits.length > 11 ? digits.slice(2) : digits;
   return local.length === 10 || local.length === 11 ? local : "";
 }
 
