@@ -1,0 +1,151 @@
+import {
+  pgTable,
+  text,
+  timestamp,
+  integer,
+  boolean,
+  jsonb,
+  uniqueIndex,
+  index,
+} from "drizzle-orm/pg-core";
+import type { Role } from "@/domain/policies";
+import type { Plan } from "@/domain/plans";
+import type { statuses } from "@/domain/validation";
+const dates = {
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+};
+export const users = pgTable("users", {
+  id: text().primaryKey(),
+  name: text().notNull(),
+  email: text().notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  ...dates,
+});
+export const dealerships = pgTable("dealerships", {
+  id: text().primaryKey(),
+  tradeName: text("trade_name").notNull(),
+  legalName: text("legal_name"),
+  cnpj: text().notNull().unique(),
+  slug: text().notNull().unique(),
+  phone: text().notNull(),
+  city: text().notNull(),
+  state: text().notNull(),
+  logoUrl: text("logo_url"),
+  primaryColor: text("primary_color").notNull().default("#FF1E1E"),
+  plan: text().$type<Plan>().notNull().default("START"),
+  billingCycle: text("billing_cycle").notNull().default("MONTHLY"),
+  subscriptionStatus: text("subscription_status").notNull().default("TRIAL"),
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }).notNull(),
+  isDemo: boolean("is_demo").notNull().default(false),
+  ...dates,
+});
+export const memberships = pgTable(
+  "memberships",
+  {
+    id: text().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    role: text().$type<Role>().notNull(),
+    status: text().notNull().default("ACTIVE"),
+  },
+  (t) => [uniqueIndex("membership_unique").on(t.userId, t.dealershipId)],
+);
+export const sessions = pgTable("sessions", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  dealershipId: text("dealership_id").references(() => dealerships.id),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+export const vehicles = pgTable(
+  "vehicles",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    createdById: text("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    brand: text().notNull(),
+    model: text().notNull(),
+    version: text().notNull().default(""),
+    yearManufacture: integer("year_manufacture").notNull(),
+    yearModel: integer("year_model").notNull(),
+    mileage: integer().notNull(),
+    transmission: text().notNull(),
+    fuel: text().notNull(),
+    color: text().notNull(),
+    price: integer().notNull(),
+    plate: text().notNull().default(""),
+    description: text().notNull().default(""),
+    options: jsonb().$type<string[]>().notNull().default([]),
+    status: text()
+      .$type<(typeof statuses)[number]>()
+      .notNull()
+      .default("AVAILABLE"),
+    soldAt: timestamp("sold_at", { withTimezone: true }),
+    ...dates,
+  },
+  (t) => [index("vehicle_tenant_idx").on(t.dealershipId, t.createdAt)],
+);
+export const vehicleMedia = pgTable("vehicle_media", {
+  id: text().primaryKey(),
+  dealershipId: text("dealership_id")
+    .notNull()
+    .references(() => dealerships.id),
+  vehicleId: text("vehicle_id")
+    .notNull()
+    .references(() => vehicles.id, { onDelete: "cascade" }),
+  storageKey: text("storage_key").notNull(),
+  thumbnailKey: text("thumbnail_key").notNull(),
+  position: integer().notNull(),
+  isCover: boolean("is_cover").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+export const usage = pgTable(
+  "usage",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    period: text().notNull(),
+    vehicleCount: integer("vehicle_count").notNull().default(0),
+  },
+  (t) => [uniqueIndex("usage_unique").on(t.dealershipId, t.period)],
+);
+export const auditLogs = pgTable("audit_logs", {
+  id: text().primaryKey(),
+  dealershipId: text("dealership_id")
+    .notNull()
+    .references(() => dealerships.id),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  entityId: text("entity_id").notNull(),
+  event: text().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+export const loginAttempts = pgTable("login_attempts", {
+  key: text().primaryKey(),
+  count: integer().notNull(),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
+});
+export type Vehicle = typeof vehicles.$inferSelect;
+export type Dealership = typeof dealerships.$inferSelect;
+export type Media = typeof vehicleMedia.$inferSelect;
