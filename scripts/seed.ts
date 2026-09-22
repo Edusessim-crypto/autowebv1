@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { eq } from "drizzle-orm";
 import { getDb } from "../src/server/db";
 import { users, dealerships, memberships } from "../src/server/schema";
 import { hashPassword } from "../src/server/auth";
 import { saveVehicle } from "../src/services/vehicles";
+import { uploadMedia } from "../src/services/media";
 async function main() {
   if (process.env.NODE_ENV === "production")
     throw new Error("Demo seed is disabled in production.");
@@ -59,6 +62,7 @@ async function main() {
       price: 128900,
       color: "Preto",
       status: "AVAILABLE" as const,
+      photo: "jetta.jpg",
     },
     {
       brand: "Toyota",
@@ -70,6 +74,7 @@ async function main() {
       price: 119900,
       color: "Prata",
       status: "AVAILABLE" as const,
+      photo: "corolla.jpg",
     },
     {
       brand: "Chevrolet",
@@ -79,22 +84,30 @@ async function main() {
       yearModel: 2023,
       mileage: 19800,
       price: 89900,
-      color: "Azul",
+      color: "Preto",
       status: "RESERVED" as const,
+      photo: "onix-plus.jpg",
     },
   ];
-  for (const v of examples)
-    await saveVehicle(
-      { user, dealership, membership },
-      {
-        ...v,
-        transmission: "Automático",
-        fuel: "Flex",
-        plate: "",
-        description: "Veículo fictício de demonstração.",
-        options: [],
-      },
+  const ctx = { user, dealership, membership };
+  for (const { photo, ...v } of examples) {
+    const id = await saveVehicle(ctx, {
+      ...v,
+      transmission: "Automático",
+      fuel: "Flex",
+      plate: "",
+      description: "Veículo fictício de demonstração.",
+      options: [],
+    });
+    // Reuses the product upload pipeline so demo photos get the same
+    // WebP conversion, thumbnail and cover assignment as real uploads.
+    const file = path.join(process.cwd(), "assets/demo", photo);
+    await uploadMedia(
+      ctx,
+      id,
+      new File([await readFile(file)], photo, { type: "image/jpeg" }),
     );
+  }
   console.log(
     "Demo criada: demo@autoweb.example. Use a senha fornecida em DEMO_PASSWORD.",
   );
