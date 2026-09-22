@@ -3040,12 +3040,13 @@ progress::-moz-progress-bar {
 }
 .stage-selector button.selected {
   color: var(--text);
-  border-color: rgba(255, 30, 30, 0.35);
-  background: var(--surface-hover);
+  border-color: var(--stage, var(--border));
+  background: var(--stage-soft, var(--surface-hover));
 }
 .stage-selector .count {
-  color: var(--subtle);
+  color: var(--stage, var(--subtle));
   font-size: 0.75rem;
+  font-weight: 600;
 }
 /* Seven stages share the width instead of scrolling sideways. */
 .kanban {
@@ -3054,48 +3055,126 @@ progress::-moz-progress-bar {
   gap: 10px;
   align-items: stretch;
 }
+
+/* Each stage carries its own accent, so the funnel reads at a glance. */
+.stage-new {
+  --stage: #7f93b8;
+  --stage-soft: rgba(127, 147, 184, 0.14);
+}
+.stage-contacted {
+  --stage: #91b4de;
+  --stage-soft: rgba(145, 180, 222, 0.14);
+}
+.stage-qualified {
+  --stage: #7fc3c9;
+  --stage-soft: rgba(127, 195, 201, 0.14);
+}
+.stage-visit {
+  --stage: #dab775;
+  --stage-soft: rgba(218, 183, 117, 0.14);
+}
+.stage-proposal {
+  --stage: #e0925f;
+  --stage-soft: rgba(224, 146, 95, 0.14);
+}
+.stage-won {
+  --stage: #77c5a1;
+  --stage-soft: rgba(119, 197, 161, 0.14);
+}
+.stage-lost {
+  --stage: #d97b7b;
+  --stage-soft: rgba(217, 123, 123, 0.14);
+}
+
 .kanban-column {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 2px solid var(--stage, var(--border));
   border-radius: var(--radius);
   padding: 12px 10px;
-  min-height: 180px;
+  min-height: 200px;
   min-width: 0;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+.kanban-column.is-over {
+  background: var(--surface-hover);
+  border-color: var(--stage);
+  box-shadow: inset 0 0 0 1px var(--stage-soft);
 }
 .kanban-column > header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 7px;
   margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.stage-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--stage, var(--subtle));
+  flex-shrink: 0;
 }
 .kanban-column h2 {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 .kanban-column .count {
-  color: var(--subtle);
-  font-size: 0.78rem;
+  color: var(--stage, var(--subtle));
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--stage-soft, transparent);
+  border-radius: 999px;
+  padding: 1px 7px;
+  flex-shrink: 0;
 }
 .kanban-cards {
   display: grid;
   gap: 9px;
+  min-height: 60px;
 }
 .lead-card {
   background: var(--surface-raised);
   border: 1px solid var(--border);
+  border-left: 2px solid var(--stage, var(--border));
   border-radius: var(--radius-sm);
   padding: 11px;
   display: grid;
   gap: 7px;
+  cursor: grab;
+  transition:
+    border-color var(--transition),
+    transform var(--transition),
+    opacity var(--transition);
 }
 .lead-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+.lead-card:active {
+  cursor: grabbing;
+}
+.lead-card.is-dragging {
+  opacity: 0.4;
+}
+.lead-card.is-saving {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.lead-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
 }
 .lead-card-open {
   text-align: left;
@@ -3105,8 +3184,22 @@ progress::-moz-progress-bar {
   cursor: pointer;
   color: var(--text);
   font-size: 0.86rem;
+  font-weight: 600;
   line-height: 1.35;
   word-break: break-word;
+  flex: 1;
+}
+.lead-card-open:hover {
+  color: var(--stage, var(--text));
+}
+.lead-card-grip {
+  color: var(--subtle);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--transition);
+}
+.lead-card:hover .lead-card-grip {
+  opacity: 0.7;
 }
 .lead-card-vehicle {
   display: flex;
@@ -3166,7 +3259,15 @@ progress::-moz-progress-bar {
 .kanban-more {
   color: var(--subtle);
   font-size: 0.78rem;
-  padding: 6px 2px;
+  padding: 10px 2px;
+}
+.kanban-column.is-over .kanban-empty {
+  color: var(--stage);
+}
+.board-error {
+  color: #ff8b8b;
+  font-size: 0.86rem;
+  margin-bottom: 12px;
 }
 
 /* Drawer */
