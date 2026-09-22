@@ -11,9 +11,12 @@ import {
   Calendar,
   Check,
   CarFront,
+  Plus,
 } from "lucide-react";
 import { requireTenant } from "@/server/auth";
 import { getVehicle } from "@/services/vehicles";
+import { leadsForVehicle } from "@/services/leads";
+import { leadStageLabels, leadSourceLabels } from "@/domain/crm";
 import { can, AppError } from "@/domain/policies";
 import { canWrite } from "@/domain/plans";
 import {
@@ -43,13 +46,17 @@ export default async function VehicleDetail({
   }
   const editable =
     can(ctx.membership.role, "vehicles:write") && canWrite(ctx.dealership);
+  // Salespeople see only their own leads, enforced inside the service.
+  const relatedLeads = can(ctx.membership.role, "crm:manage")
+    ? await leadsForVehicle(ctx, v.id)
+    : [];
   const tab = p.tab || "geral";
   const tabs = [
     ["geral", "Visão geral"],
     ["fotos", `Fotos (${v.media.length})`],
     ["conteudo", "Conteúdo"],
     ["publicacoes", "Publicações"],
-    ["leads", "Leads"],
+    ["leads", `Leads (${relatedLeads.length})`],
     ["historico", "Histórico"],
   ];
   return (
@@ -215,15 +222,65 @@ export default async function VehicleDetail({
             </div>
           ))}
         </section>
+      ) : tab === "leads" ? (
+        <section className="panel">
+          <div className="panel-heading">
+            <h2>Oportunidades deste veículo</h2>
+            <Link className="button secondary" href={`/crm/novo?vehicleId=${v.id}`}>
+              <Plus size={16} />
+              Adicionar lead
+            </Link>
+          </div>
+          {relatedLeads.length ? (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Etapa</th>
+                  <th>Origem</th>
+                  <th>Responsável</th>
+                </tr>
+              </thead>
+              <tbody>
+                {relatedLeads.map((item) => (
+                  <tr key={item.lead.id}>
+                    <td data-label="Cliente">
+                      <Link
+                        className="cell-title"
+                        href={`/crm?lead=${item.lead.id}`}
+                      >
+                        {item.customerName}
+                      </Link>
+                    </td>
+                    <td data-label="Etapa">
+                      <span className="stage-tag">
+                        {leadStageLabels[item.lead.stage]}
+                      </span>
+                    </td>
+                    <td data-label="Origem">
+                      {leadSourceLabels[item.lead.source]}
+                    </td>
+                    <td data-label="Responsável">
+                      {item.assignedName || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <EmptyState
+              title="Nenhum interessado ainda"
+              description="Registre uma oportunidade quando alguém demonstrar interesse neste veículo."
+            />
+          )}
+        </section>
       ) : (
         <section className="panel">
           <EmptyState
             title={
               tab === "conteudo"
                 ? "Conteúdo conectado a este veículo"
-                : tab === "leads"
-                  ? "Oportunidades deste veículo"
-                  : "Publicações deste veículo"
+                : "Publicações deste veículo"
             }
             description="Este módulo será disponibilizado em uma próxima etapa. As informações do veículo já estão organizadas para essa conexão."
             action={<span className="small-tag">EM BREVE</span>}

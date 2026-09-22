@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { requireTenant } from "@/server/auth";
 import { dashboard, listVehicles } from "@/services/vehicles";
+import { crmSummary } from "@/services/leads";
+import { leadStageLabels } from "@/domain/crm";
 import {
   PageHeader,
   NewVehicleButton,
@@ -27,9 +29,15 @@ import {
 import { can } from "@/domain/policies";
 export default async function Dashboard() {
   const ctx = await requireTenant();
-  const [stats, recent] = await Promise.all([
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const [stats, recent, crm] = await Promise.all([
     dashboard(ctx),
     listVehicles(ctx),
+    can(ctx.membership.role, "crm:manage")
+      ? crmSummary(ctx, monthStart)
+      : Promise.resolve(null),
   ]);
   const month = new Intl.DateTimeFormat("pt-BR", {
     month: "long",
@@ -47,9 +55,11 @@ export default async function Dashboard() {
     },
     {
       label: "NOVOS LEADS",
-      value: 0,
+      value: crm?.newLeads ?? 0,
       icon: UsersRound,
-      sub: "CRM disponível em breve",
+      sub: crm
+        ? `${crm.openLeads} em aberto no funil`
+        : "Disponível para o seu perfil em breve",
       href: "/crm",
     },
     {
@@ -148,15 +158,45 @@ export default async function Dashboard() {
           </div>
         </Panel>
         <Panel title="Leads recentes" link={{ href: "/crm", label: "Ver CRM" }}>
-          <EmptyState
-            title="Novas oportunidades, em breve"
-            description="O CRM vai conectar os interessados aos veículos da sua revenda."
-            icon={UsersRound}
-          />
-          <div className="subtle-note">
-            <span className="small-tag">PRÓXIMA ETAPA</span> Seu relacionamento
-            com clientes começa aqui.
-          </div>
+          {crm && crm.recent.length ? (
+            <ul className="lead-list">
+              {crm.recent.map((item) => (
+                <li key={item.lead.id}>
+                  <Link className="lead-line" href={`/crm?lead=${item.lead.id}`}>
+                    <span className="stage-tag">
+                      {leadStageLabels[item.lead.stage]}
+                    </span>
+                    <strong>{item.customerName}</strong>
+                    {item.vehicleBrand && (
+                      <span className="lead-source">
+                        {item.vehicleBrand} {item.vehicleModel}
+                      </span>
+                    )}
+                    <span className="lead-owner">
+                      {item.assignedName || "Sem responsável"}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              title="Nenhum lead ainda"
+              description="Cadastre a primeira oportunidade para acompanhar o funil."
+              icon={UsersRound}
+              action={
+                <Link className="button primary" href="/crm/novo">
+                  Nova oportunidade
+                </Link>
+              }
+            />
+          )}
+          {crm && crm.overdue > 0 && (
+            <div className="subtle-note">
+              <span className="small-tag">ATENÇÃO</span> {crm.overdue}{" "}
+              oportunidade(s) com próxima ação vencida.
+            </div>
+          )}
         </Panel>
       </div>
       <div className="dashboard-lower">

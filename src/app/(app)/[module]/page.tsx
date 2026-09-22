@@ -22,8 +22,6 @@ import { can } from "@/domain/policies";
 const subtitles: Record<string, string> = {
   studio: "Crie conteúdos para seus veículos.",
   publicacoes: "Gerencie e agende suas publicações.",
-  crm: "Acompanhe seus leads e oportunidades.",
-  clientes: "Organize sua base de clientes.",
   site: "Gerencie a presença online da sua revenda.",
   equipe: "Gerencie acessos e permissões.",
   relatorios: "Acompanhe os resultados da sua operação.",
