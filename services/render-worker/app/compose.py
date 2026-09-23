@@ -125,6 +125,18 @@ def format_price(cents: int) -> str:
     return f"{round(cents / 100):,}".replace(",", ".")
 
 
+def format_contact(raw: str) -> str:
+    """(51) 98912-3952 lê melhor numa arte do que 51989123952."""
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    if digits.startswith("55") and len(digits) > 11:
+        digits = digits[2:]
+    if len(digits) == 11:
+        return f"({digits[:2]}) {digits[2:7]}-{digits[7:]}"
+    if len(digits) == 10:
+        return f"({digits[:2]}) {digits[2:6]}-{digits[6:]}"
+    return raw.strip()
+
+
 def vehicle_title(vehicle: VehicleInput) -> str:
     return f"{vehicle.brand} {vehicle.model}".strip().upper()
 
@@ -209,11 +221,11 @@ def draw_branding(
 
     contact_slot = definition.brandingSlots.get("contact")
     if contact_slot:
-        parts = [p for p in (branding.whatsapp or branding.phone,) if p]
-        if parts:
+        contact = format_contact(branding.whatsapp or branding.phone)
+        if contact:
             draw_plain_text(
                 card,
-                " · ".join(parts),
+                contact,
                 TextBox(contact_slot, 30, 20, align="left",
                         font="Barlow-LightItalic.ttf"),
                 definition,

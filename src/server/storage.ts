@@ -31,6 +31,17 @@ class LocalStorage implements StorageProvider {
       if (e.code !== "ENOENT") throw e;
     });
   }
+  /** Em desenvolvimento o objeto é servido pela própria aplicação, numa
+   *  rota interna autenticada pelo segredo do worker — nada fica público. */
+  async signedUrl(key: string) {
+    if (!keyPattern.test(key)) throw new Error("Invalid storage key");
+    const origin = process.env.APP_ORIGIN || "http://127.0.0.1:3107";
+    const token = process.env.RENDER_WORKER_SECRET || "";
+    return (
+      `${origin}/api/internal/object?key=${encodeURIComponent(key)}` +
+      `&token=${encodeURIComponent(token)}`
+    );
+  }
 }
 // Supabase Storage over its REST API; the service role key never leaves the
 // server, so the bucket stays private and reads keep going through /api/media.

@@ -20,7 +20,6 @@ import { dashboard, getVehicle } from "@/services/vehicles";
 import { plans, getLimit, canWrite } from "@/domain/plans";
 import { can } from "@/domain/policies";
 const subtitles: Record<string, string> = {
-  studio: "Crie conteúdos para seus veículos.",
   publicacoes: "Gerencie e agende suas publicações.",
   site: "Gerencie a presença online da sua revenda.",
   equipe: "Gerencie acessos e permissões.",
