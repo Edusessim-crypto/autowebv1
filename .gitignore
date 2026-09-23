@@ -7,3 +7,11 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .data-teste/
+
+# Worker de render
+services/render-worker/.venv/
+services/render-worker/__pycache__/
+services/render-worker/**/__pycache__/
+services/render-worker/.pytest_cache/
+services/render-worker/tests/golden-private/inputs/
+services/render-worker/tests/golden-private/expected/

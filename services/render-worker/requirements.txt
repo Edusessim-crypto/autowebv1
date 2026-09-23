@@ -1,0 +1,13 @@
+# Versões herdadas do motor validado (CARMULTI_V7_COMPLETO/requirements.txt).
+# Atualizar qualquer uma destas pode mudar bounding boxes, métricas e pixels:
+# só faça isso com o harness de regressão em mãos.
+Pillow>=10.0
+numpy>=1.24
+opencv-python-headless==4.10.0.84
+ultralytics>=8.3
+
+# Camada de serviço da AutoWeb (não faz parte do motor).
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.9
+httpx>=0.27

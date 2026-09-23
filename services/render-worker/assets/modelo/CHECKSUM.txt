@@ -1,0 +1,8 @@
+# Modelo YOLO validado do motor V7. Versionado de propósito: em produção o
+# Ultralytics não pode baixar uma versão arbitrária, porque um modelo
+# diferente muda os bounding boxes e, com eles, todo o enquadramento.
+
+yolo11n-seg.pt
+SHA-256  55ed65c56c91713d23e8402371c6c49a6fd84f257f7dce452e8d70e41dcbe152
+Bytes    6182636
+Origem   CARMULTI_V7_COMPLETO/modelo/yolo11n-seg.pt (build 2026-09-10)

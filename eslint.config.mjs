@@ -4,5 +4,11 @@ import nextTs from "eslint-config-next/typescript";
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", ".data/**", "next-env.d.ts"]),
+  // O worker de render é um serviço Python; seu venv não é código nosso.
+  globalIgnores([
+    ".next/**",
+    ".data/**",
+    "next-env.d.ts",
+    "services/render-worker/**",
+  ]),
 ]);

@@ -12,6 +12,12 @@ import type { Role } from "@/domain/policies";
 import type { Plan } from "@/domain/plans";
 import type { statuses } from "@/domain/validation";
 import type { LeadSource, LeadStage, ActivityType } from "@/domain/crm";
+import type {
+  ProjectStatus,
+  JobStatus,
+  AssetStatus,
+  TemplateVariant,
+} from "@/domain/studio";
 const dates = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -220,7 +226,103 @@ export const crmActivities = pgTable(
   },
   (t) => [index("activity_lead_idx").on(t.leadId, t.createdAt)],
 );
+export const contentProjects = pgTable(
+  "content_projects",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    vehicleId: text("vehicle_id")
+      .notNull()
+      .references(() => vehicles.id),
+    createdById: text("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    templateKey: text("template_key").notNull(),
+    templateVersion: integer("template_version").notNull().default(1),
+    templateVariant: text("template_variant")
+      .$type<TemplateVariant>()
+      .notNull()
+      .default("STANDARD"),
+    status: text().$type<ProjectStatus>().notNull().default("DRAFT"),
+    configuration: jsonb()
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
+    errorMessage: text("error_message").notNull().default(""),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    ...dates,
+  },
+  (t) => [
+    index("content_project_tenant_idx").on(t.dealershipId, t.createdAt),
+    index("content_project_vehicle_idx").on(t.dealershipId, t.vehicleId),
+    index("content_project_status_idx").on(t.dealershipId, t.status),
+  ],
+);
+export const renderJobs = pgTable(
+  "render_jobs",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    contentProjectId: text("content_project_id")
+      .notNull()
+      .references(() => contentProjects.id),
+    attempt: integer().notNull().default(1),
+    status: text().$type<JobStatus>().notNull().default("QUEUED"),
+    engineVersion: text("engine_version").notNull().default(""),
+    errorCode: text("error_code").notNull().default(""),
+    errorMessage: text("error_message").notNull().default(""),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("render_job_project_idx").on(t.contentProjectId, t.attempt),
+    index("render_job_status_idx").on(t.dealershipId, t.status),
+  ],
+);
+export const generatedAssets = pgTable(
+  "generated_assets",
+  {
+    id: text().primaryKey(),
+    dealershipId: text("dealership_id")
+      .notNull()
+      .references(() => dealerships.id),
+    contentProjectId: text("content_project_id")
+      .notNull()
+      .references(() => contentProjects.id),
+    renderJobId: text("render_job_id").references(() => renderJobs.id),
+    sourceMediaId: text("source_media_id").references(() => vehicleMedia.id),
+    position: integer().notNull().default(0),
+    storageKey: text("storage_key").notNull(),
+    mimeType: text("mime_type").notNull().default("image/png"),
+    width: integer().notNull().default(0),
+    height: integer().notNull().default(0),
+    status: text().$type<AssetStatus>().notNull().default("OK"),
+    framing: jsonb().$type<Record<string, number>>().notNull().default({}),
+    metrics: jsonb().$type<Record<string, number> | null>(),
+    issues: jsonb().$type<string[]>().notNull().default([]),
+    detectedVehicleType: text("detected_vehicle_type").notNull().default(""),
+    photoGroup: text("photo_group").notNull().default(""),
+    manuallyAdjusted: boolean("manually_adjusted").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("generated_asset_project_idx").on(t.contentProjectId, t.position),
+    index("generated_asset_tenant_idx").on(t.dealershipId, t.createdAt),
+  ],
+);
 export type Vehicle = typeof vehicles.$inferSelect;
+export type ContentProject = typeof contentProjects.$inferSelect;
+export type RenderJob = typeof renderJobs.$inferSelect;
+export type GeneratedAsset = typeof generatedAssets.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Lead = typeof leads.$inferSelect;
 export type CrmActivity = typeof crmActivities.$inferSelect;

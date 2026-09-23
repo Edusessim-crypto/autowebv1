@@ -6,7 +6,9 @@ export type Permission =
   | "crm:manage"
   | "reports:read"
   | "dealership:configure"
-  | "site:manage";
+  | "site:manage"
+  | "studio:read"
+  | "studio:manage";
 const permissions: Record<Role, readonly Permission[]> = {
   ADMIN: [
     "vehicles:read",
@@ -16,6 +18,8 @@ const permissions: Record<Role, readonly Permission[]> = {
     "reports:read",
     "dealership:configure",
     "site:manage",
+    "studio:read",
+    "studio:manage",
   ],
   MANAGER: [
     "vehicles:read",
@@ -23,8 +27,10 @@ const permissions: Record<Role, readonly Permission[]> = {
     "crm:manage",
     "reports:read",
     "site:manage",
+    "studio:read",
+    "studio:manage",
   ],
-  SALESPERSON: ["vehicles:read", "crm:manage"],
+  SALESPERSON: ["vehicles:read", "crm:manage", "studio:read"],
 };
 export function can(role: Role, permission: Permission) {
   return permissions[role].includes(permission);

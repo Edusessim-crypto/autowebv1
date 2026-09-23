@@ -4,9 +4,14 @@ export interface StorageProvider {
   put(key: string, data: Buffer): Promise<void>;
   get(key: string): Promise<Buffer>;
   remove(key: string): Promise<void>;
+  // URL temporária para um serviço interno ler o objeto sem abrir o bucket.
+  // Nunca é persistida: o banco guarda a storageKey.
+  signedUrl?(key: string, expiresInSeconds: number): Promise<string>;
 }
+// Chaves aceitas: mídia do veículo/marca e as peças geradas pelo Studio.
+// Restringir o formato impede que uma chave arbitrária alcance o bucket.
 const keyPattern =
-  /^[a-f0-9-]+\/(vehicles|branding)\/[a-f0-9-]+(-thumb)?\.webp$/;
+  /^(?:[a-f0-9-]+\/(?:vehicles|branding)\/[a-f0-9-]+(?:-thumb)?\.webp|dealerships\/[a-f0-9-]+\/content\/[a-f0-9-]+\/[a-f0-9-]+\/card-\d{2}\.png)$/;
 class LocalStorage implements StorageProvider {
   private root = path.resolve(process.env.LOCAL_DATA_DIR || ".data", "uploads");
   private resolve(key: string) {
@@ -74,6 +79,21 @@ class SupabaseStorage implements StorageProvider {
     // A missing object is already the desired end state.
     if (!response.ok && response.status !== 404)
       throw new Error(`Storage removal failed (${response.status}).`);
+  }
+  async signedUrl(key: string, expiresInSeconds: number) {
+    if (!keyPattern.test(key)) throw new Error("Invalid storage key");
+    const response = await fetch(
+      `${this.url}/storage/v1/object/sign/${this.bucket}/${key}`,
+      {
+        method: "POST",
+        headers: { ...this.headers(), "content-type": "application/json" },
+        body: JSON.stringify({ expiresIn: expiresInSeconds }),
+      },
+    );
+    if (!response.ok)
+      throw new Error(`Signed URL failed (${response.status}).`);
+    const data = (await response.json()) as { signedURL: string };
+    return `${this.url}/storage/v1${data.signedURL}`;
   }
 }
 export function getStorage(): StorageProvider {
