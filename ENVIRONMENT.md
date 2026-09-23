@@ -11,6 +11,8 @@
 | SUPABASE_URL              | URL do projeto Supabase, ex. `https://<ref>.supabase.co`. Exigida com `supabase`.        |
 | SUPABASE_SERVICE_ROLE_KEY | Chave `service_role`. Somente servidor: nunca expor ao cliente nem versionar.            |
 | SUPABASE_STORAGE_BUCKET   | Bucket privado dos uploads; padrão `vehicle-media`.                                      |
+| RENDER_WORKER_URL         | Endereço do worker de render. Sem ela, o Studio responde 503.                            |
+| RENDER_WORKER_SECRET      | Segredo compartilhado com o worker. Somente servidor.                                    |
 | DEMO_PASSWORD             | Somente seed explícito local, mínimo 12 caracteres.                                      |
 | ALLOW_LOCAL_DB            | Escape `true` para verificar build de produção localmente. Nunca usar no deploy real.    |
 

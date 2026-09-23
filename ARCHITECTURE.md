@@ -7,7 +7,8 @@ Next.js App Router, React, TypeScript estrito, Tailwind CSS 4 + tokens CSS, Driz
 - `src/app`: rotas, composição das páginas e handlers HTTP.
 - `src/components`: componentes de apresentação e interações de formulário.
 - `src/domain`: validação, permissões e regras de planos.
-- `src/services`: casos de uso de estoque, mídia, clientes e CRM.
+- `src/services`: casos de uso de estoque, mídia, clientes, CRM e Studio.
+- `services/render-worker`: serviço Python que gera as peças do Studio.
 - `src/server`: acesso ao banco, schema, autenticação e storage.
 - `src/config`: navegação.
 - `migrations`: SQL versionado, aplicado em ordem de nome. Cada arquivo é idempotente, então repetir o conjunto leva qualquer banco ao schema atual.
@@ -49,3 +50,15 @@ Branch, Customer, Lead, ContentTemplate, ContentProject, SocialPost e SiteConfig
 A visibilidade do vendedor é aplicada em SQL, não na interface: `ADMIN` e `MANAGER` leem o funil inteiro, `SALESPERSON` apenas as oportunidades atribuídas a si, e só pode atribuir uma oportunidade a si mesmo. Telefones são normalizados para dígitos na gravação, de modo que busca e deduplicação concordem.
 
 A mudança de etapa grava atividade e log de auditoria na mesma transação do lead. Marcar como perdido exige motivo.
+
+## Studio
+
+O motor visual roda num serviço Python separado, fora da Vercel, porque carrega
+PyTorch e YOLO. A aplicação autentica, autoriza, monta o payload e grava o
+resultado; o worker só renderiza e não consulta o banco da AutoWeb.
+
+`content_projects`, `render_jobs` e `generated_assets` seguem o isolamento por
+revenda. Cada peça guarda o enquadramento e as métricas de QC, o que permite
+reeditar um card sem reprocessar o lote.
+
+Detalhes em `docs/STUDIO_RENDER_ARCHITECTURE.md`.
